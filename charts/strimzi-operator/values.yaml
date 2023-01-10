@@ -1,0 +1,287 @@
+cruiseControl:
+  enabled: true
+
+kafka:
+
+  nameOverride:
+
+  fullnameOverride:
+
+  # The version of kafka image to use
+  # @type: string
+  version: 3.2.1
+
+  # The number of kafka cluster replicas
+  # @type: int
+  replicas: 3
+
+  # The logger level for kafka
+  # @type: string
+  loggerLevel: WARN
+
+  # Annotations attached to a kafka pod
+  #
+  #  Example:
+  #
+  # ```yaml
+  #  annotations:
+  #    linkerd.io/inject: enabled
+  #```
+  #
+  # @type: map
+  annotations:
+    linkerd.io/inject: enabled
+
+  # Listeners configure how clients connect to the Kafka cluster via bootstrap addresses.
+  # Listeners are configured as internal or external listeners for connection from inside or outside the Kubernetes cluster.
+  # https://strimzi.io/docs/operators/latest/configuring.html#assembly-securing-kafka-brokers-str
+  #
+  #  Example:
+  #
+  # ```yaml
+  #  listeners:
+  #    - name: plain
+  #      port: 9092
+  #      type: internal
+  #      tls: false
+  #    - name: tls
+  #      port: 9093
+  #      type: internal
+  #      tls: true
+  #```
+  #
+  # @type: array<map>
+  listeners:
+    - name: plain
+      port: 9092
+      type: internal
+      tls: false
+      authentication:
+        type: scram-sha-512
+    - name: tls
+      port: 9093
+      type: internal
+      tls: true
+
+  # The config specifies the broker configuration.
+  # Standard Apache Kafka configuration may be provided, restricted to those properties not managed directly by Strimzi.
+  # https://strimzi.io/docs/operators/latest/configuring.html#property-kafka-config-reference
+  #
+  # @type: map
+  config:
+    offsets.topic.replication.factor: 3
+    transaction.state.log.replication.factor: 3
+    transaction.state.log.min.isr: 2
+    default.replication.factor: 3
+    min.insync.replicas: 2
+    inter.broker.protocol.version: "3.2"
+    message.max.bytes: 2097152
+    replica.fetch.max.bytes: 2145728
+    log.retention.hours: 168
+    delete.topic.enable: true
+    num.partitions: 4
+
+  # Healthchecks to know when to restart a container (liveness) and when a container can accept traffic (readiness).
+  #
+  # Example
+  #
+  # ```yaml
+  #  readinessProbe:
+  #    initialDelaySeconds: 15
+  #    timeoutSeconds: 5
+  #```
+  #
+  # @type: map
+  readinessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 5
+
+  # Healthchecks to know when to restart a container (liveness) and when a container can accept traffic (readiness).
+  #
+  # Example
+  #
+  # ```yaml
+  #  livenessProbe:
+  #    initialDelaySeconds: 15
+  #    timeoutSeconds: 5
+  #```
+  #
+  # @type: map
+  livenessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 5
+
+  # The resource requests (CPU, memory, etc.)
+  # for each of the server agents. This should be a YAML map corresponding to a Kubernetes
+  # ResourceRequirements (https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#resourcerequirements-v1-core)
+  # object. NOTE: The use of a YAML string is deprecated.
+  #
+  # Example:
+  #
+  # ```yaml
+  # resources:
+  #   requests:
+  #     memory: '100Mi'
+  #     cpu: '100m'
+  #   limits:
+  #     memory: '100Mi'
+  #     cpu: '100m'
+  # ```
+  #
+  # @recurse: false
+  # @type: map
+  resources:
+    requests:
+      memory: 2Gi
+    limits:
+      memory: 2Gi
+
+  # JVM configuration options to optimize performance for the Virtual Machine (VM) running Kafka.
+  # https://strimzi.io/docs/operators/latest/configuring.html#con-common-configuration-jvm-reference
+  #
+  # Example:
+  #
+  # ```yaml
+  #  jvmOptions:
+  #    -Xms: 1024m
+  #    -Xmx: 1024m
+  #```
+  #
+  # @type: map
+  jvmOptions:
+    -Xms: 1536m
+    -Xmx: 1536m
+
+  # instanceSize
+  #
+  # @type: string
+  instanceSize: 100Gi
+
+  users:
+    - name: "kafka"
+      authorization: true
+
+  authorization:
+    type: simple
+  rack:
+    topologyKey: topology.kubernetes.io/zone
+
+  rackawareness:
+    enabled: true
+
+zookeeper:
+
+  nameOverride:
+
+  fullnameOverride:
+
+  # The number of kafka cluster replicas
+  # @type: int
+  replicas: 3
+
+  # The logger level for Zookeeper
+  # @type: string
+  loggerLevel: WARN
+
+  # Annotations attached to a kafka pod
+  #
+  #  Example:
+  #
+  # ```yaml
+  #  annotations:
+  #    linkerd.io/inject: enabled
+  #```
+  #
+  # @type: map
+  annotations:
+    linkerd.io/inject: enabled
+
+  # The resource requests (CPU, memory, etc.)
+  # for each of the server agents. This should be a YAML map corresponding to a Kubernetes
+  # ResourceRequirements (https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#resourcerequirements-v1-core)
+  # object. NOTE: The use of a YAML string is deprecated.
+  #
+  # Example:
+  #
+  # ```yaml
+  # resources:
+  #   requests:
+  #     memory: '100Mi'
+  #     cpu: '100m'
+  #   limits:
+  #     memory: '100Mi'
+  #     cpu: '100m'
+  # ```
+  #
+  # @recurse: false
+  # @type: map
+  resources:
+    requests:
+      memory: 1536Mi
+    limits:
+      memory: 1536Mi
+
+  # Healthchecks to know when to restart a container (liveness) and when a container can accept traffic (readiness).
+  #
+  # Example
+  #
+  # ```yaml
+  #  readinessProbe:
+  #    initialDelaySeconds: 15
+  #    timeoutSeconds: 5
+  #```
+  #
+  # @type: map
+  readinessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 5
+
+  # Healthchecks to know when to restart a container (liveness) and when a container can accept traffic (readiness).
+  #
+  # Example
+  #
+  # ```yaml
+  #  livenessProbe:
+  #    initialDelaySeconds: 15
+  #    timeoutSeconds: 5
+  #```
+  #
+  # @type: map
+  livenessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 5
+
+  # JVM configuration options to optimize performance for the Virtual Machine (VM) running Kafka.
+  # https://strimzi.io/docs/operators/latest/configuring.html#con-common-configuration-jvm-reference
+  #
+  # Example:
+  #
+  # ```yaml
+  #  jvmOptions:
+  #    -Xms: 1024m
+  #    -Xmx: 1024m
+  #```
+  #
+  # @type: map
+  jvmOptions:
+    -Xms: 1024m
+    -Xmx: 1024m
+
+  # instanceSize
+  #
+  # @type: string
+  instanceSize: 100Gi
+
+# Enable monitoring of kafka cluster
+# https://strimzi.io/docs/operators/latest/deploying.html#assembly-metrics-str
+monitoring:
+  enabled: true
+
+# Enable topicOperator and userOperator to be installed
+# https://strimzi.io/docs/operators/latest/configuring.html#assembly-kafka-entity-operator-str
+entityOperator:
+  enabled: true
+  topicOperator:
+    loggerLevel: WARN
+  userOperator:
+    loggerLevel: WARN

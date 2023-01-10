@@ -1,0 +1,127 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: strimzi
+spec:
+{{- if .Values.cruiseControl.enabled }}
+  cruiseControl:
+    config:
+      sample.store.topic.replication.factor: 3
+{{- end }}  
+  kafka:
+    {{- if .Values.kafka.annotations }}
+    template:
+      pod:
+        metadata:
+          annotations:
+            {{- toYaml .Values.kafka.annotations | nindent 12 }}
+    {{- end }}
+    logging:
+      type: inline
+      loggers:
+        kafka.root.logger.level: {{ .Values.kafka.loggerLevel }}
+        log4j.logger.kafka: {{ .Values.kafka.loggerLevel }}
+    version: {{ .Values.kafka.version }}
+    replicas: {{ .Values.kafka.replicas }}
+    listeners:
+      {{- toYaml .Values.kafka.listeners | nindent 6 }}
+    config:
+      {{- toYaml .Values.kafka.config | nindent 6 }}
+    {{- if .Values.kafka.resources }}
+    resources:
+      {{- toYaml .Values.kafka.resources | nindent 6 }}
+    {{- end }}
+    {{- if .Values.kafka.authorization }}
+    authorization:
+      {{- toYaml .Values.kafka.authorization | nindent 6 }}
+    {{- end }}
+    {{- if .Values.kafka.readinessProbe }}
+    readinessProbe:
+      {{- toYaml .Values.kafka.readinessProbe | nindent 6 }}
+    {{- end }}
+    {{- if .Values.kafka.livenessProbe }}
+    livenessProbe:
+      {{- toYaml .Values.kafka.livenessProbe | nindent 6 }}
+    {{- end }}
+    {{- if .Values.kafka.jvmOptions }}
+    jvmOptions:
+      {{- toYaml .Values.kafka.jvmOptions | nindent 6 }}
+    {{- end }}
+    storage:
+      type: jbod
+      volumes:
+      - id: 0
+        type: persistent-claim
+        size: {{ .Values.kafka.instanceSize }}
+        deleteClaim: false
+    {{- if .Values.kafka.rackawareness.enabled }}
+    rack: 
+      {{- toYaml .Values.kafka.rack | nindent 6 }}
+    {{- end }}
+    {{- if .Values.monitoring.enabled }}
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: {{ template "kafka.name" .}}-metrics
+          key: {{ template "kafka.name" .}}-metrics-config.yml
+    {{- end }}
+  zookeeper:
+    {{- if .Values.zookeeper.annotations }}
+    template:
+      pod:
+        metadata:
+          annotations:
+            {{- toYaml .Values.zookeeper.annotations | nindent 12 }}
+    {{- end }}
+    logging:
+      type: inline
+      loggers:
+        zookeeper.root.logger: {{ .Values.zookeeper.loggerLevel }}
+    replicas: {{ .Values.zookeeper.replicas }}
+    storage:
+      type: persistent-claim
+      size: {{ .Values.zookeeper.instanceSize }}
+      deleteClaim: false
+    {{- if .Values.zookeeper.resources }}
+    resources:
+      {{- toYaml .Values.zookeeper.resources | nindent 6 }}
+    {{- end }}
+    {{- if .Values.zookeeper.readinessProbe }}
+    readinessProbe:
+      {{- toYaml .Values.zookeeper.readinessProbe | nindent 6 }}
+    {{- end }}
+    {{- if .Values.zookeeper.livenessProbe }}
+    livenessProbe:
+      {{- toYaml .Values.zookeeper.livenessProbe | nindent 6 }}
+    {{- end }}
+    {{- if .Values.zookeeper.jvmOptions }}
+    jvmOptions:
+      {{- toYaml .Values.zookeeper.jvmOptions | nindent 6 }}
+    {{- end }}
+    {{- if .Values.monitoring.enabled }}
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: {{ template "kafka.name" .}}-metrics
+          key: {{ template "zookeeper.name" .}}-metrics-config.yml
+    {{- end }}
+  {{- if .Values.entityOperator.enabled }}
+  entityOperator:
+    topicOperator:
+      logging: 
+        type: inline
+        loggers:
+          rootLogger.level: {{ .Values.entityOperator.topicOperator.loggerLevel }}
+    userOperator:
+      logging: 
+        type: inline
+        loggers:
+          rootLogger.level: {{ .Values.entityOperator.userOperator.loggerLevel }}    
+  {{- end }}
+{{- if .Values.monitoring.enabled }}
+  kafkaExporter:
+    topicRegex: ".*"
+    groupRegex: ".*"
+{{- end }}
