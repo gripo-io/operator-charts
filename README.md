@@ -13,8 +13,8 @@ the latest versions of the packages.  You can then run `helm search repo
 
 To install the strimzi operator chart:
 
-    helm install strimzi-operator gripo-operators/sample-kafka
+    helm install strimzi gripo-operators/strimzi-operator
 
 To uninstall the chart:
 
-    helm delete strimzi-operator
+    helm delete strimzi
