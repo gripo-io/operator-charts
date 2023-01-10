@@ -1,0 +1,54 @@
+{{- range $users := .Values.kafka.users }}
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: strimzi-{{ $users.name }}
+  labels:
+    strimzi.io/cluster: strimzi
+spec:
+  authentication:
+    type: scram-sha-512
+  {{- if eq $users.authorization true }}
+  authorization:
+    type: simple
+    acls:
+      - resource:
+          type: topic
+          name: "*"
+          patternType: literal
+        operation: Read
+        host: "*"
+      - resource:
+          type: topic
+          name: "*"
+          patternType: literal
+        operation: Describe
+        host: "*"
+      - resource:
+          type: group
+          name: "*"
+          patternType: literal
+        operation: Read
+        host: "*"
+      # Example Producer Acls for topic my-topic
+      - resource:
+          type: topic
+          name: "*"
+          patternType: literal
+        operation: Write
+        host: "*"
+      - resource:
+          type: topic
+          name: "*"
+          patternType: literal
+        operation: Create
+        host: "*"
+      - resource:
+          type: topic
+          name: "*"
+          patternType: literal
+        operation: Delete
+        host: "*"
+  {{- end }}
+---
+{{- end }}
